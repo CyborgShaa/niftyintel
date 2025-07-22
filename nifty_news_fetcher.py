@@ -14,7 +14,11 @@ RSS_FEEDS = {
     "Livemint Markets": "https://www.livemint.com/rss/market",
     "Bloomberg Quint": "https://www.bqprime.com/markets/rss",
     "CNBC TV18": "https://www.cnbctv18.com/rss/marketnews.xml",
-    "Zee Business": "https://zeenews.india.com/rss/business.xml"
+    "Zee Business": "https://zeenews.india.com/rss/business.xml",
+    "https://www.thehindubusinessline.com/markets/rss/",
+    "https://in.investing.com/rss/market_overview.rss",
+    "https://www.financialexpress.com/market/feed/",
+    "Google News": "https://news.google.com/rss/search?q=nifty+stock+market+india"
 }
 
 # ✅ Only accept news that includes these keywords
