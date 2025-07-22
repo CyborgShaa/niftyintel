@@ -15,9 +15,9 @@ RSS_FEEDS = {
     "Bloomberg Quint": "https://www.bqprime.com/markets/rss",
     "CNBC TV18": "https://www.cnbctv18.com/rss/marketnews.xml",
     "Zee Business": "https://zeenews.india.com/rss/business.xml",
-    "https://www.thehindubusinessline.com/markets/rss/",
-    "https://in.investing.com/rss/market_overview.rss",
-    "https://www.financialexpress.com/market/feed/",
+    "The Hindu Business Line": "https://www.thehindubusinessline.com/markets/rss/",
+    "Investing.com": "https://in.investing.com/rss/market_overview.rss",
+    "Financial Express": "https://www.financialexpress.com/market/feed/",
     "Google News": "https://news.google.com/rss/search?q=nifty+stock+market+india"
 }
 
