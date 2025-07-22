@@ -6,6 +6,7 @@ import pytz
 import time
 
 from nifty_news_fetcher import fetch_nifty_news
+from newsapi_fetcher import fetch_newsapi_articles
 from summarizer import analyze_news
 from telegram_alerts import send_telegram_alert
 
@@ -20,32 +21,39 @@ st.markdown("Get live and impactful Nifty-related market news in one place.")
 st.caption(f"🔄 Last updated: {current_time}")
 st.divider()
 
-# How old news can be (in minutes)
-NEWS_AGE_LIMIT = 60
+# Configurations
+NEWS_AGE_LIMIT = 60  # minutes
 AUTO_REFRESH_MINUTES = 5
 
-# Fetch and sort news
-news_data = fetch_nifty_news(limit_per_feed=5)
-news_data = sorted(news_data, key=lambda x: x["timestamp"], reverse=True)
-
-# Filter recent articles
-news_data = [
-    n for n in news_data
-    if (datetime.now(tz) - n["timestamp"]).total_seconds() <= NEWS_AGE_LIMIT * 60
-]
-
-# Track alerts
-if "alerted_titles" not in st.session_state:
-    st.session_state.alerted_titles = set()
-
-# Emoji for sentiment
+# Impact sentiment emojis
 impact_emojis = {
     "Bullish": "🟢",
     "Bearish": "🔴",
     "Neutral": "⚪"
 }
 
-# Display & alert
+# 🔽 Fetch news from both sources
+rss_articles = fetch_nifty_news(limit_per_feed=5)
+api_articles = fetch_newsapi_articles(
+    query="nifty OR sensex OR bank nifty OR rbi OR fii OR dii OR inflation OR repo rate",
+    limit=5
+)
+
+# 🔁 Combine and sort by timestamp
+news_data = sorted(rss_articles + api_articles, key=lambda x: x["timestamp"], reverse=True)
+
+# ✅ Filter only recent news
+news_data = [
+    n for n in news_data
+    if isinstance(n["timestamp"], datetime) and
+    (datetime.now(tz) - n["timestamp"]).total_seconds() <= NEWS_AGE_LIMIT * 60
+]
+
+# Session state for avoiding duplicate alerts
+if "alerted_titles" not in st.session_state:
+    st.session_state.alerted_titles = set()
+
+# 🔁 Display and alert logic
 for news in news_data:
     summary, impact = analyze_news(news["title"])
 
@@ -60,16 +68,16 @@ for news in news_data:
         send_telegram_alert(message)
         st.session_state.alerted_titles.add(news["title"])
 
-    # Show in UI
+    # Display on Streamlit
     st.markdown(f"### {impact_emojis.get(impact, '⚪')} [{news['title']}]({news['link']})")
     st.caption(f"🕒 {news['timestamp'].strftime('%b %d, %I:%M %p')} | 📰 {news['source']}")
     st.markdown(f"**Summary**: {summary or 'N/A'}")
     st.markdown("---")
 
-# Manual alert button
+# Test alert
 if st.button("Send Test Alert"):
     send_telegram_alert("📣 Test alert from NiftyIntel")
 
-# Auto refresh every X mins
+# Auto-refresh
 time.sleep(AUTO_REFRESH_MINUTES * 60)
 st.experimental_rerun()
