@@ -1,38 +1,60 @@
-# nifty_news_fetcher.py
+# news_fetcher.py
 
 import feedparser
 from datetime import datetime
 import pytz
 
-# RSS feed sources (feel free to expand)
-NIFTY_RSS_FEEDS = [
-    "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
-    "https://www.moneycontrol.com/rss/MCtopnews.xml",
-    "https://www.livemint.com/rss/markets",
+tz = pytz.timezone("Asia/Kolkata")
+
+# ✅ Reliable sources for Indian market/index news
+RSS_FEEDS = {
+    "Economic Times Markets": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
+    "Moneycontrol Markets": "https://www.moneycontrol.com/rss/MCtopnews.xml",
+    "Business Standard": "https://www.business-standard.com/rss/markets-106.rss",
+    "Livemint Markets": "https://www.livemint.com/rss/market",
+    "Bloomberg Quint": "https://www.bqprime.com/markets/rss",
+    "CNBC TV18": "https://www.cnbctv18.com/rss/marketnews.xml",
+    "Zee Business": "https://zeenews.india.com/rss/business.xml"
+}
+
+# ✅ Only accept news that includes these keywords
+NIFTY_KEYWORDS = [
+    "nifty", "nifty50", "nifty 50", "bank nifty", "sensex", "index",
+    "indices", "market crash", "bull market", "bear market", "india vix",
+    "gap up", "gap down", "SGX Nifty", "fii", "dii", "option chain",
+    "futures", "expiry", "rbi", "inflation", "repo rate", "gdp", "bond yield",
+    "us inflation", "global cues", "fomc"
 ]
 
 def fetch_nifty_news(limit_per_feed=5):
     all_articles = []
-    tz = pytz.timezone("Asia/Kolkata")
 
-    for url in NIFTY_RSS_FEEDS:
-        feed = feedparser.parse(url)
+    for source, url in RSS_FEEDS.items():
+        try:
+            feed = feedparser.parse(url)
+            for entry in feed.entries[:limit_per_feed]:
+                title = entry.title.strip()
+                link = entry.link.strip()
+                published = entry.get("published", "") or entry.get("pubDate", "")
+                description = entry.get("summary", "").strip()
 
-        for entry in feed.entries[:limit_per_feed]:
-            try:
-                published = entry.get("published", "") or entry.get("updated", "")
-                timestamp = datetime.strptime(published, "%a, %d %b %Y %H:%M:%S %Z")
-                timestamp = tz.localize(timestamp)
-            except Exception:
-                timestamp = datetime.now(tz)
+                # Convert to datetime object
+                try:
+                    timestamp = datetime(*entry.published_parsed[:6], tzinfo=pytz.utc).astimezone(tz)
+                except Exception:
+                    continue  # skip if time can't be parsed
 
-            article = {
-                "title": entry.title,
-                "link": entry.link,
-                "source": feed.feed.get("title", "Unknown"),
-                "timestamp": timestamp
-            }
+                # ✅ Keyword filtering
+                if any(keyword in title.lower() for keyword in NIFTY_KEYWORDS):
+                    all_articles.append({
+                        "title": title,
+                        "link": link,
+                        "timestamp": timestamp,
+                        "description": description,
+                        "source": source
+                    })
 
-            all_articles.append(article)
+        except Exception as e:
+            print(f"❌ Failed to parse {source}: {e}")
 
     return all_articles
