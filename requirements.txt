@@ -1,0 +1,7 @@
+streamlit
+feedparser
+requests
+pytz
+python-dotenv
+openai
+google-generativeai
