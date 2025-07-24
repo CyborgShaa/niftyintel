@@ -36,6 +36,10 @@ def fetch_nifty_news(limit_per_feed=5):
     for source, url in RSS_FEEDS.items():
         try:
             feed = feedparser.parse(url)
+
+            # ✅ DEBUG: Show how many articles we fetched per source
+            print(f"✅ {source}: {len(feed.entries)} articles fetched")
+
             for entry in feed.entries[:limit_per_feed]:
                 title = entry.title.strip()
                 link = entry.link.strip()
