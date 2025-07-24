@@ -49,8 +49,7 @@ def fetch_nifty_news(limit_per_feed=5):
                     continue  # skip if time can't be parsed
 
                 # ✅ Keyword filtering
-                if any(keyword in title.lower() for keyword in NIFTY_KEYWORDS):
-                    all_articles.append({
+                all_articles.append({
                         "title": title,
                         "link": link,
                         "timestamp": timestamp,
