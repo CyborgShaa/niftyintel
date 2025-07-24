@@ -43,11 +43,11 @@ api_articles = fetch_newsapi_articles(
 news_data = sorted(rss_articles + api_articles, key=lambda x: x["timestamp"], reverse=True)
 
 # ✅ Filter only recent news
-news_data = [
-    n for n in news_data
-    if isinstance(n["timestamp"], datetime) and
-    (datetime.now(tz) - n["timestamp"]).total_seconds() <= NEWS_AGE_LIMIT * 60
-]
+#news_data = [
+#n for n in news_data 
+#if isinstance(n["timestamp"], datetime) and
+#(datetime.now(tz) - n["timestamp"]).total_seconds() <= NEWS_AGE_LIMIT * 60
+#]
 
 # Session state for avoiding duplicate alerts
 if "alerted_titles" not in st.session_state:
